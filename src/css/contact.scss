@@ -1,0 +1,31 @@
+#contact-form {
+    textarea:focus,
+    input:focus {
+        outline: none;
+    }
+    input {
+        background-color: #f2f3f3;
+        border: none;
+        border-radius: 5px;
+        width: 100%;
+        height: 30px;
+    }
+
+    label {
+        color: #000;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    #message {
+        background-color: #f2f3f3;
+        border: none;
+        border-radius: 5px;
+        height: 85px;
+    }
+
+    .w-30 {
+        width: 30%;
+        margin-top: 10px;
+    }
+}

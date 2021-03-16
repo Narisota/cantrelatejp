@@ -1,0 +1,3 @@
+mutation validateCoupon($coupon_name: String!) {
+    validateCoupon(coupon_name: $coupon_name)
+}

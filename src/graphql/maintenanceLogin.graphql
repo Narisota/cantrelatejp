@@ -1,0 +1,6 @@
+mutation maintenanceLogin($access_id: String!, $password: String!) {
+    maintenanceLogin(access_id: $access_id, password: $password) {
+        refreshToken
+        accessToken
+    }
+}

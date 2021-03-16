@@ -1,0 +1,3 @@
+mutation paypalCheckout($products: String!, $coupon: String!) {
+    paypalCheckout(products: $products, coupon: $coupon)
+}

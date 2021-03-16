@@ -1,0 +1,13 @@
+.faq-wrapper {
+    width: 50%;
+}
+
+@media only screen and (max-width: 700px) {
+    .faq-wrapper {
+        width: 80%;
+        h3 {
+            font-size: 23px;
+            font-weight: 550 !important;
+        }
+    }
+}

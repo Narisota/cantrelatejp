@@ -1,0 +1,7 @@
+query getCurrUser {
+    getCurrUser {
+        email
+        uuid
+        user_id
+    }
+}

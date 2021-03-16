@@ -1,0 +1,26 @@
+query getUsersOrders {
+    getUsersOrders {
+        products {
+            product_id
+            name
+            desc
+            price
+            stock
+            exp_date
+            quantityOrdered
+            productSubtotal
+            images {
+                img_id
+                img_url
+                index
+            }
+        }
+        order_id
+        tracking_num
+        order_total
+        coupon
+        discount
+        shipping
+        date_of_purchase
+    }
+}

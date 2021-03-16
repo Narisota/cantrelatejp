@@ -1,0 +1,119 @@
+#nav {
+    li {
+        height: 64px;
+        &:hover {
+            &:after {
+                width: 100%;
+                transition: width 0.3s;
+            }
+        }
+
+        &:after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #980000;
+            transition: width 0.3s;
+        }
+
+        a {
+            color: #fff;
+            font-weight: 400;
+            font-size: 2rem;
+            padding: 0px 10px 0px 10px;
+            margin-bottom: -2px;
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+}
+
+.letter {
+    display: inline-block;
+}
+
+.announcement {
+    display: none;
+}
+
+@font-face {
+    font-family: SBU;
+    src: url("SBU.ttf");
+}
+
+nav .brand-logo {
+    img {
+        width: 250px;
+        height: 64px;
+    }
+
+    font-family: SBU;
+    font-size: 2.5rem !important;
+    margin-left: 5%;
+}
+
+a:active,
+a:focus {
+    outline: 0;
+    border: none;
+    -moz-outline-style: none;
+}
+
+#nav {
+    display: none;
+}
+
+#mobile-cart {
+    display: none;
+}
+
+@media only screen and (min-width: 993px) {
+    .hide-on-large {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 1250px) {
+    #nav {
+        display: inline-block;
+    }
+}
+
+@media only screen and (max-width: 1249px) {
+    nav .brand-logo {
+        margin-left: 0px;
+        left: 50%;
+        font-size: 2.1rem !important;
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%);
+    }
+
+    .sidenav-trigger {
+        display: block !important;
+        i {
+            color: #fff;
+            display: block;
+        }
+    }
+
+    #desktop-logout {
+        display: none;
+    }
+
+    #mobile-cart {
+        display: block;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    nav .brand-logo {
+        font-size: 1.75rem !important;
+
+        img {
+            width: 220px;
+            height: 56px;
+        }
+    }
+}

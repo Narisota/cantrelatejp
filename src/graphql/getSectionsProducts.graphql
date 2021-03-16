@@ -1,0 +1,15 @@
+query getSectionsProducts($section_id: Float!) {
+    getSectionsProducts(section_id: $section_id) {
+        product_id
+        name
+        desc
+        price
+        stock
+        org_stock
+        images {
+            img_id
+            img_url
+            index
+        }
+    }
+}

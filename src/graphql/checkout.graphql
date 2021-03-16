@@ -1,0 +1,17 @@
+mutation checkout(
+    $token: String!
+    $user_id: String!
+    $products: String!
+    $shipping_info: String!
+    $billing_info: String!
+    $coupon: String!
+) {
+    checkout(
+        token: $token
+        user_id: $user_id
+        products: $products
+        shipping_info: $shipping_info
+        billing_info: $billing_info
+        coupon: $coupon
+    )
+}

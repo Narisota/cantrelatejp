@@ -1,0 +1,38 @@
+#footer-info {
+    li {
+        a {
+            &:hover {
+                h4 {
+                    color: #980000;
+                }
+            }
+        }
+    }
+}
+
+footer {
+    @font-face {
+        font-family: SBU;
+        src: url("SBU.ttf");
+    }
+
+    .footer-logo {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 4.5% 0 4.5% 0;
+        justify-content: space-between;
+        h1 {
+            font-family: SBU;
+            color: white;
+            margin: 0;
+        }
+    }
+}
+
+#social-link {
+    color: #fff;
+    &:hover {
+        color: #980000;
+    }
+}

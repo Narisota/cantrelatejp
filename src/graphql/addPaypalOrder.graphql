@@ -1,0 +1,13 @@
+mutation addPaypalOrder(
+    $user_id: String!
+    $coupon: String!
+    $products: String!
+    $purchase_units: String!
+) {
+    addPaypalOrder(
+        user_id: $user_id
+        coupon: $coupon
+        products: $products
+        purchase_units: $purchase_units
+    )
+}
