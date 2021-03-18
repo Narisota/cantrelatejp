@@ -12,6 +12,7 @@ const AppWrapper = () => {
     const maintance = GetMaintenance();
     const [pageLoader, setPageLoader] = useState(true);
 
+    console.log("maintance :>> ", maintance);
     // eslint-disable-next-line
     const [mainLoader, setMainLoader] = useState(false);
     useEffect(() => {
