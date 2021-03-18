@@ -35,7 +35,7 @@ const Preloader = () => {
                 targets: [".circle-2", ".circle-4"],
                 translateY: 24,
             },
-            500
+            0
         )
         .add({
             targets: [".circle-1", ".circle-3"],
