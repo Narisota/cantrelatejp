@@ -26,7 +26,6 @@ const Preloader = () => {
             elasticity: 400,
             loop: true,
         })
-        .add({ targets: [""] })
         .add({
             targets: [".circle-1", ".circle-3"],
             translateY: -24,
