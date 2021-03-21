@@ -1,5 +1,8 @@
-import { FaInstagram, FaEnvelope } from "react-icons/fa";
-import { useGetAnnouncementsQuery } from "../../generated/graphql";
+import { FaInstagram, FaEnvelope, FaTwitter, FaFacebook } from "react-icons/fa";
+import {
+    useGetAnnouncementsQuery,
+    useGetSocialsQuery,
+} from "../../generated/graphql";
 import anime from "animejs";
 import { useEffect } from "react";
 
@@ -34,7 +37,19 @@ import { useEffect } from "react";
 //     return animations[index];
 // };
 
+const GetSocials = () => {
+    const { data, loading } = useGetSocialsQuery({
+        variables: {
+            component: "footer",
+        },
+    });
+    const sdata = data,
+        sloading = loading;
+    return { sdata, sloading };
+};
+
 const AnnouncementBar = () => {
+    const { sdata, sloading } = GetSocials();
     const { data, loading, error } = useGetAnnouncementsQuery();
 
     useEffect(() => {
@@ -95,7 +110,7 @@ const AnnouncementBar = () => {
         }
     }, [data]);
 
-    if (loading) {
+    if (loading || sloading) {
         return <></>;
     }
 
@@ -146,21 +161,58 @@ const AnnouncementBar = () => {
                 </>
 
                 <span className="right">
-                    <a
-                        href="mailto:cantrelatejp@gmail.com"
-                        style={{ color: "#fff" }}
-                    >
-                        <FaEnvelope
-                            style={{ marginRight: "5px", marginLeft: "5px" }}
-                        />
-                    </a>
+                    {!!sdata && sdata.getSocials ? (
+                        <>
+                            {sdata.getSocials.map((_val, i) => {
+                                if (sdata.getSocials[i].display) {
+                                    return (
+                                        <a
+                                            id="social-link"
+                                            key={i}
+                                            href={
+                                                sdata.getSocials[i].social_url
+                                            }
+                                            style={{
+                                                width: "30px",
+                                                height: "30px",
+                                                marginRight: "7px",
+                                            }}
+                                        >
+                                            <SocialIcon
+                                                social_logo={
+                                                    sdata.getSocials[i]
+                                                        .social_logo
+                                                }
+                                            />
+                                        </a>
+                                    );
+                                } else {
+                                    <></>;
+                                }
+                            })}
+                        </>
+                    ) : (
+                        <>
+                            <a
+                                href="mailto:cantrelatejp@gmail.com"
+                                style={{ color: "#fff" }}
+                            >
+                                <FaEnvelope
+                                    style={{
+                                        marginRight: "5px",
+                                        marginLeft: "5px",
+                                    }}
+                                />
+                            </a>
 
-                    <a
-                        href="https://www.instagram.com/cantrelate.jp/"
-                        style={{ color: "#fff" }}
-                    >
-                        <FaInstagram />
-                    </a>
+                            <a
+                                href="https://www.instagram.com/cantrelate.jp/"
+                                style={{ color: "#fff" }}
+                            >
+                                <FaInstagram />
+                            </a>
+                        </>
+                    )}
                 </span>
             </div>
         </div>
@@ -168,3 +220,53 @@ const AnnouncementBar = () => {
 };
 
 export default AnnouncementBar;
+
+const SocialIcon: React.FC<{ social_logo: string }> = ({ social_logo }) => {
+    switch (social_logo) {
+        case "I": {
+            return (
+                <FaInstagram
+                    style={{
+                        height: 22,
+                        width: 22,
+                    }}
+                />
+            );
+        }
+
+        case "E": {
+            return (
+                <FaEnvelope
+                    style={{
+                        height: 22,
+                        width: 22,
+                    }}
+                />
+            );
+        }
+        case "T": {
+            return (
+                <FaTwitter
+                    style={{
+                        height: 22,
+                        width: 22,
+                    }}
+                />
+            );
+        }
+        case "F": {
+            return (
+                <FaFacebook
+                    style={{
+                        height: 22,
+                        width: 22,
+                    }}
+                />
+            );
+        }
+
+        default: {
+            return <>ERROR</>;
+        }
+    }
+};

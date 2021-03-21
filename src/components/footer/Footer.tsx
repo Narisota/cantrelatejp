@@ -1,5 +1,4 @@
 import CopyrightBar from "./CopyrightBar";
-import FooterLogo from "../../images/Blank_Footer_logo.png";
 import { FaInstagram, FaEnvelope, FaTwitter, FaFacebook } from "react-icons/fa";
 import { useGetSocialsQuery } from "../../generated/graphql";
 import "../../css/footer.scss";
