@@ -123,7 +123,14 @@ const Cart = () => {
                             </div>
                             <div className="col s12 m4">
                                 <h5 className="center-align hide-on-small-only">
-                                    {products[i].name}
+                                    {products[i].name}{" "}
+                                    {!products[i].option ? (
+                                        <></>
+                                    ) : (
+                                        <span className="bold">
+                                            ({products[i].option})
+                                        </span>
+                                    )}
                                 </h5>
 
                                 <h6 className="center-align show-on-small hide-on-med-and-up">

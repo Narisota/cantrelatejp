@@ -1,9 +1,35 @@
 import { Redirect } from "react-router";
-import { useGetProductQuery } from "../../generated/graphql";
+import {
+    useGetProductQuery,
+    useGetProductsOptionsQuery,
+} from "../../generated/graphql";
 import { useDispatch } from "react-redux";
 import { addProductToCart } from "../../redux/actions/userAction";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import anime from "animejs";
+
+const GetProductOptions = () => {
+    var product_id;
+    if (process.env.NODE_ENV === "production") {
+        product_id = Number(window.location.href.split(":")[2]);
+    } else {
+        product_id = Number(window.location.href.split(":")[3]);
+    }
+
+    const { data, loading } = useGetProductsOptionsQuery({
+        variables: {
+            product_id,
+        },
+    });
+
+    let odata = data,
+        oloading = loading;
+
+    return {
+        odata,
+        oloading,
+    };
+};
 
 const ProductDetails = () => {
     let product_id: number;
@@ -14,12 +40,14 @@ const ProductDetails = () => {
     }
 
     const dispatch = useDispatch();
-
+    const { odata, oloading } = GetProductOptions();
     const { data, loading, error } = useGetProductQuery({
         variables: {
             product_id,
         },
     });
+
+    const [option, setOption] = useState("");
 
     useEffect(() => {
         var elems = document.querySelectorAll(".tooltipped");
@@ -27,7 +55,17 @@ const ProductDetails = () => {
         elems = document.querySelectorAll(".carousel");
         M.Carousel.init(elems);
 
+        elems = document.querySelectorAll(".dropdown-trigger");
+        M.Dropdown.init(elems);
+
         if (!loading) {
+            elems = document.querySelectorAll(".tooltipped");
+            M.Tooltip.init(elems);
+            elems = document.querySelectorAll(".carousel");
+            M.Carousel.init(elems);
+
+            elems = document.querySelectorAll(".dropdown-trigger");
+            M.Dropdown.init(elems);
             // (stock * 100)/ org_stock
             let percent = 50;
             if (!data || !data!.getProduct.org_stock) {
@@ -57,13 +95,15 @@ const ProductDetails = () => {
         }
     }, [loading, data]);
 
-    if (loading) {
+    if (loading || oloading) {
         return <></>;
     }
 
-    if (!data || error) {
+    if (!data || error || !odata) {
         return <Redirect to="/products" />;
     }
+
+    console.log("odata :>> ", odata);
 
     let product: any = data!.getProduct;
 
@@ -75,6 +115,7 @@ const ProductDetails = () => {
     //     );
     //     instance.next();
     // }, 5000);
+
     return (
         <div>
             <h3 className="center-align">{product.name}</h3>
@@ -130,6 +171,7 @@ const ProductDetails = () => {
                                                                 instance.prev();
                                                             }}
                                                         ></span>
+
                                                         <img
                                                             alt="product"
                                                             style={{
@@ -143,6 +185,7 @@ const ProductDetails = () => {
                                                                 ].img_url || ""
                                                             }
                                                         />
+
                                                         <span
                                                             style={{
                                                                 display:
@@ -309,25 +352,94 @@ const ProductDetails = () => {
                         <></>
                     ) : (
                         <>
-                            <button
-                                style={{
-                                    width: "100%",
-                                    backgroundColor: "#0a0a0a",
-                                    color: "#fff",
-                                    border: "none",
-                                    height: "45px",
-                                }}
-                                onClick={() => {
-                                    M.toast({
-                                        html: "Product was added to cart",
-                                    });
-                                    dispatch(addProductToCart(product));
-                                }}
-                            >
-                                Add to Cart
-                            </button>
+                            {odata.getProductsOptions.length !== 0 ? (
+                                <>
+                                    {/* eslint-disable-next-line */}
+                                    <a
+                                        className="dropdown-trigger btn select"
+                                        data-target="dropdown1"
+                                    >
+                                        <>
+                                            {" "}
+                                            {option ? (
+                                                <>{option}</>
+                                            ) : (
+                                                <>SELECT OPTION</>
+                                            )}
+                                        </>
+                                    </a>
+                                    <button
+                                        id="add-cart-btn"
+                                        className="btn disabled"
+                                        style={{
+                                            width: "100%",
+                                            backgroundColor: "#0a0a0a",
+                                            color: "#fff",
+                                            border: "none",
+                                            height: "45px",
+                                        }}
+                                        onClick={() => {
+                                            if (!!option) {
+                                                M.toast({
+                                                    html:
+                                                        "Product was added to cart",
+                                                });
+                                                let tmp = product;
+                                                tmp.option = option;
+                                                dispatch(addProductToCart(tmp));
+                                            }
+                                        }}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    id="add-cart-btn"
+                                    style={{
+                                        width: "100%",
+                                        backgroundColor: "#0a0a0a",
+                                        color: "#fff",
+                                        border: "none",
+                                        height: "45px",
+                                    }}
+                                    onClick={() => {
+                                        M.toast({
+                                            html: "Product was added to cart",
+                                        });
+                                        dispatch(addProductToCart(product));
+                                    }}
+                                >
+                                    Add to Cart
+                                </button>
+                            )}
                         </>
                     )}
+
+                    <ul id="dropdown1" className="dropdown-content">
+                        <>
+                            {odata.getProductsOptions.map((_val, i) => {
+                                return (
+                                    <li
+                                        key={i}
+                                        onClick={() => {
+                                            setOption(
+                                                odata.getProductsOptions[i].name
+                                            );
+                                            document
+                                                .getElementById("add-cart-btn")!
+                                                .classList.remove("disabled");
+                                        }}
+                                    >
+                                        {/* eslint-disable-next-line */}
+                                        <a>
+                                            {odata.getProductsOptions[i].name}
+                                        </a>
+                                    </li>
+                                );
+                            })}
+                        </>
+                    </ul>
                 </div>
             </div>
         </div>

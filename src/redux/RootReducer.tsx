@@ -3,6 +3,7 @@ export interface Product {
     name: string;
     price: number;
     stock: number;
+    option?: string;
 }
 
 export interface ProductInCart {
@@ -11,6 +12,7 @@ export interface ProductInCart {
     price: number;
     stock: number;
     quantity: number;
+    option?: string;
 }
 
 export interface State {
@@ -21,6 +23,7 @@ export interface State {
             price: number;
             stock: number;
             quantity: number;
+            option?: string;
         }
     ];
 }
@@ -30,6 +33,7 @@ const loadState = () => {
         let serializedState = localStorage.getItem("store-state");
         if (serializedState) {
             let state = JSON.parse(serializedState);
+            console.log("state :>> ", state);
             return state;
         }
     } catch (err) {
@@ -51,21 +55,36 @@ type Actions = {
 export const RootReducer = (state = initState, action: Actions) => {
     switch (action.type) {
         case "ADD_PRODUCT_TO_CART": {
-            let tmp = state.productsInCart || [];
+            debugger;
+            let products = state.productsInCart || [];
+            console.log("products :>> ", products);
 
             //if product is already in cart increase quantity instead of adding a new product
-            for (let i = 0; i < tmp.length; i++) {
-                if (tmp[i].product_id === action.product!.product_id) {
-                    tmp[i].quantity++;
-                    return { ...state, productsInCart: tmp };
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].product_id === action.product!.product_id) {
+                    //if product does not have an option
+                    if (!!action.product && !action.product.option) {
+                        products[i].quantity++;
+                        return { ...state, productsInCart: products };
+                    }
+                    // if added product and option is the same as any in the cart increase quantity
+                    else if (
+                        products[i].name === action.product!.name &&
+                        products[i].option === action.product!.option
+                    ) {
+                        products[i].quantity++;
+                        return { ...state, productsInCart: products };
+                    }
                 }
             }
-            let tmp2: any = action.product;
-            tmp2.quantity = 1;
 
-            tmp.push(tmp2);
+            let newProduct: any = action.product;
 
-            return { ...state, productsInCart: tmp };
+            newProduct.quantity = 1;
+
+            products.push(newProduct);
+
+            return { ...state, productsInCart: products };
         }
 
         case "CHANGE_QUANTITY_ON_PRODUCT": {

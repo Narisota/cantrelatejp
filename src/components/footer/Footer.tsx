@@ -4,7 +4,7 @@ import { useGetSocialsQuery } from "../../generated/graphql";
 import "../../css/footer.scss";
 
 const Footer = () => {
-    const { data, loading } = useGetSocialsQuery({
+    const { data } = useGetSocialsQuery({
         variables: {
             component: "footer",
         },
@@ -108,7 +108,7 @@ const Footer = () => {
                                                         </a>
                                                     );
                                                 } else {
-                                                    <></>;
+                                                    return null;
                                                 }
                                             })}
                                         </>

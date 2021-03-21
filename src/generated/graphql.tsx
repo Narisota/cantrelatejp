@@ -19,7 +19,9 @@ export type Query = {
   getOrders: Array<GetOrdersResponse>;
   getOrderById: GetOrdersResponse;
   getProducts: Array<ProductsWithImages>;
+  apiGetProducts: Array<ProductsWithImages>;
   getProduct: ProductsWithImages;
+  apiGetProduct: ProductsWithImages;
   getApiUsers: Array<ApiUser>;
   getCurrUser: Users;
   getCoupons: Array<Coupons>;
@@ -30,6 +32,7 @@ export type Query = {
   getSectionById: Sections;
   getProductsSections: Array<SectionsOrNull>;
   getSectionsProducts: Array<ProductsWithImages>;
+  getProductsOptions: Array<Options>;
 };
 
 
@@ -39,6 +42,11 @@ export type QueryGetOrderByIdArgs = {
 
 
 export type QueryGetProductArgs = {
+  product_id: Scalars['Float'];
+};
+
+
+export type QueryApiGetProductArgs = {
   product_id: Scalars['Float'];
 };
 
@@ -60,6 +68,11 @@ export type QueryGetProductsSectionsArgs = {
 
 export type QueryGetSectionsProductsArgs = {
   section_id: Scalars['Float'];
+};
+
+
+export type QueryGetProductsOptionsArgs = {
+  product_id: Scalars['Float'];
 };
 
 export type GetOrdersResponse = {
@@ -106,6 +119,7 @@ export type ProductsWithImages = {
   org_stock?: Maybe<Scalars['Int']>;
   exp_date?: Maybe<Scalars['String']>;
   images?: Maybe<Array<Images>>;
+  hidden: Scalars['Boolean'];
 };
 
 export type ApiUser = {
@@ -159,12 +173,22 @@ export type SectionsOrNull = {
   thumbnail?: Maybe<Scalars['String']>;
 };
 
+export type Options = {
+  __typename?: 'Options';
+  option_id: Scalars['Int'];
+  name: Scalars['String'];
+  price: Scalars['Int'];
+  stock: Scalars['Int'];
+  index: Scalars['Int'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   editTracking: Scalars['Boolean'];
   paypalCheckout: Scalars['String'];
   addPaypalOrder: Scalars['Boolean'];
   checkout: Scalars['String'];
+  toggleProductDisplay: Scalars['Boolean'];
   addProduct: Scalars['String'];
   deleteProduct: Scalars['Boolean'];
   updateProduct: Scalars['Boolean'];
@@ -190,6 +214,8 @@ export type Mutation = {
   addProductToSection: Scalars['String'];
   removeProductFromSection: Scalars['Boolean'];
   updateSection: Scalars['Boolean'];
+  addOptionToProduct: Scalars['Boolean'];
+  deleteOptions: Scalars['Boolean'];
 };
 
 
@@ -220,6 +246,11 @@ export type MutationCheckoutArgs = {
   products: Scalars['String'];
   user_id: Scalars['String'];
   token: Scalars['String'];
+};
+
+
+export type MutationToggleProductDisplayArgs = {
+  product_id: Scalars['Float'];
 };
 
 
@@ -356,6 +387,17 @@ export type MutationUpdateSectionArgs = {
   name: Scalars['String'];
 };
 
+
+export type MutationAddOptionToProductArgs = {
+  product_id: Scalars['Float'];
+  options_str: Scalars['String'];
+};
+
+
+export type MutationDeleteOptionsArgs = {
+  options_str: Scalars['String'];
+};
+
 export type AuthResponse = {
   __typename?: 'AuthResponse';
   accessToken?: Maybe<Scalars['String']>;
@@ -449,6 +491,19 @@ export type GetProductsQuery = (
       { __typename?: 'Images' }
       & Pick<Images, 'img_id' | 'img_url'>
     )>> }
+  )> }
+);
+
+export type GetProductsOptionsQueryVariables = Exact<{
+  product_id: Scalars['Float'];
+}>;
+
+
+export type GetProductsOptionsQuery = (
+  { __typename?: 'Query' }
+  & { getProductsOptions: Array<(
+    { __typename?: 'Options' }
+    & Pick<Options, 'option_id' | 'name' | 'price' | 'stock' | 'index'>
   )> }
 );
 
@@ -837,6 +892,43 @@ export function useGetProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type GetProductsQueryHookResult = ReturnType<typeof useGetProductsQuery>;
 export type GetProductsLazyQueryHookResult = ReturnType<typeof useGetProductsLazyQuery>;
 export type GetProductsQueryResult = Apollo.QueryResult<GetProductsQuery, GetProductsQueryVariables>;
+export const GetProductsOptionsDocument = gql`
+    query getProductsOptions($product_id: Float!) {
+  getProductsOptions(product_id: $product_id) {
+    option_id
+    name
+    price
+    stock
+    index
+  }
+}
+    `;
+
+/**
+ * __useGetProductsOptionsQuery__
+ *
+ * To run a query within a React component, call `useGetProductsOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProductsOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProductsOptionsQuery({
+ *   variables: {
+ *      product_id: // value for 'product_id'
+ *   },
+ * });
+ */
+export function useGetProductsOptionsQuery(baseOptions: Apollo.QueryHookOptions<GetProductsOptionsQuery, GetProductsOptionsQueryVariables>) {
+        return Apollo.useQuery<GetProductsOptionsQuery, GetProductsOptionsQueryVariables>(GetProductsOptionsDocument, baseOptions);
+      }
+export function useGetProductsOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProductsOptionsQuery, GetProductsOptionsQueryVariables>) {
+          return Apollo.useLazyQuery<GetProductsOptionsQuery, GetProductsOptionsQueryVariables>(GetProductsOptionsDocument, baseOptions);
+        }
+export type GetProductsOptionsQueryHookResult = ReturnType<typeof useGetProductsOptionsQuery>;
+export type GetProductsOptionsLazyQueryHookResult = ReturnType<typeof useGetProductsOptionsLazyQuery>;
+export type GetProductsOptionsQueryResult = Apollo.QueryResult<GetProductsOptionsQuery, GetProductsOptionsQueryVariables>;
 export const GetSectionByIdDocument = gql`
     query getSectionById($section_id: Float!) {
   getSectionById(section_id: $section_id) {

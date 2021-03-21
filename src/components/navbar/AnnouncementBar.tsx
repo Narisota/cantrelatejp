@@ -187,7 +187,7 @@ const AnnouncementBar = () => {
                                         </a>
                                     );
                                 } else {
-                                    <></>;
+                                    return null;
                                 }
                             })}
                         </>
