@@ -47,7 +47,7 @@ const ProductDetails = () => {
         },
     });
 
-    const [option, setOption] = useState("");
+    const [option, setOption] = useState({ name: "", option_id: 0 });
 
     useEffect(() => {
         var elems = document.querySelectorAll(".tooltipped");
@@ -361,8 +361,8 @@ const ProductDetails = () => {
                                     >
                                         <>
                                             {" "}
-                                            {option ? (
-                                                <>{option}</>
+                                            {option.name ? (
+                                                <>{option.name}</>
                                             ) : (
                                                 <>SELECT OPTION</>
                                             )}
@@ -385,7 +385,9 @@ const ProductDetails = () => {
                                                         "Product was added to cart",
                                                 });
                                                 let tmp = product;
-                                                tmp.option = option;
+                                                tmp.option = option.name;
+                                                tmp.option_id =
+                                                    option.option_id;
                                                 dispatch(addProductToCart(tmp));
                                             }
                                         }}
@@ -423,9 +425,14 @@ const ProductDetails = () => {
                                     <li
                                         key={i}
                                         onClick={() => {
-                                            setOption(
-                                                odata.getProductsOptions[i].name
-                                            );
+                                            setOption({
+                                                name:
+                                                    odata.getProductsOptions[i]
+                                                        .name,
+                                                option_id:
+                                                    odata.getProductsOptions[i]
+                                                        .option_id,
+                                            });
                                             document
                                                 .getElementById("add-cart-btn")!
                                                 .classList.remove("disabled");

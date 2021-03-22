@@ -4,6 +4,7 @@ export interface Product {
     price: number;
     stock: number;
     option?: string;
+    option_id?: number;
 }
 
 export interface ProductInCart {
@@ -13,6 +14,7 @@ export interface ProductInCart {
     stock: number;
     quantity: number;
     option?: string;
+    option_id?: number;
 }
 
 export interface State {
@@ -24,6 +26,7 @@ export interface State {
             stock: number;
             quantity: number;
             option?: string;
+            option_id?: number;
         }
     ];
 }

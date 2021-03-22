@@ -1,0 +1,22 @@
+query getProductsByIds($products_str: String!) {
+    getProductsByIds(products_str: $products_str) {
+        product_id
+        name
+        desc
+        price
+        stock
+        org_stock
+        exp_date
+        images {
+            img_id
+            img_url
+        }
+        options {
+            option_id
+            name
+            price
+            stock
+            index
+        }
+    }
+}

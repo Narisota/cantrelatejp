@@ -19,6 +19,7 @@ export type Query = {
   getOrders: Array<GetOrdersResponse>;
   getOrderById: GetOrdersResponse;
   getProducts: Array<ProductsWithImages>;
+  getProductsByIds: Array<ProductsWithOptionAndImages>;
   apiGetProducts: Array<ProductsWithImages>;
   getProduct: ProductsWithImages;
   apiGetProduct: ProductsWithImages;
@@ -38,6 +39,11 @@ export type Query = {
 
 export type QueryGetOrderByIdArgs = {
   order_id: Scalars['Float'];
+};
+
+
+export type QueryGetProductsByIdsArgs = {
+  products_str: Scalars['String'];
 };
 
 
@@ -122,6 +128,28 @@ export type ProductsWithImages = {
   hidden: Scalars['Boolean'];
 };
 
+export type ProductsWithOptionAndImages = {
+  __typename?: 'ProductsWithOptionAndImages';
+  product_id: Scalars['Int'];
+  name: Scalars['String'];
+  desc: Scalars['String'];
+  price: Scalars['Int'];
+  stock: Scalars['Int'];
+  org_stock?: Maybe<Scalars['Int']>;
+  exp_date?: Maybe<Scalars['String']>;
+  images?: Maybe<Array<Images>>;
+  options?: Maybe<Array<Options>>;
+};
+
+export type Options = {
+  __typename?: 'Options';
+  option_id: Scalars['Int'];
+  name: Scalars['String'];
+  price: Scalars['Int'];
+  stock: Scalars['Int'];
+  index: Scalars['Int'];
+};
+
 export type ApiUser = {
   __typename?: 'ApiUser';
   uuid: Scalars['Float'];
@@ -173,15 +201,6 @@ export type SectionsOrNull = {
   thumbnail?: Maybe<Scalars['String']>;
 };
 
-export type Options = {
-  __typename?: 'Options';
-  option_id: Scalars['Int'];
-  name: Scalars['String'];
-  price: Scalars['Int'];
-  stock: Scalars['Int'];
-  index: Scalars['Int'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   editTracking: Scalars['Boolean'];
@@ -215,6 +234,7 @@ export type Mutation = {
   removeProductFromSection: Scalars['Boolean'];
   updateSection: Scalars['Boolean'];
   addOptionToProduct: Scalars['Boolean'];
+  updateOptions: Scalars['Boolean'];
   deleteOptions: Scalars['Boolean'];
 };
 
@@ -394,6 +414,11 @@ export type MutationAddOptionToProductArgs = {
 };
 
 
+export type MutationUpdateOptionsArgs = {
+  options_str: Scalars['String'];
+};
+
+
 export type MutationDeleteOptionsArgs = {
   options_str: Scalars['String'];
 };
@@ -490,6 +515,26 @@ export type GetProductsQuery = (
     & { images?: Maybe<Array<(
       { __typename?: 'Images' }
       & Pick<Images, 'img_id' | 'img_url'>
+    )>> }
+  )> }
+);
+
+export type GetProductsByIdsQueryVariables = Exact<{
+  products_str: Scalars['String'];
+}>;
+
+
+export type GetProductsByIdsQuery = (
+  { __typename?: 'Query' }
+  & { getProductsByIds: Array<(
+    { __typename?: 'ProductsWithOptionAndImages' }
+    & Pick<ProductsWithOptionAndImages, 'product_id' | 'name' | 'desc' | 'price' | 'stock' | 'org_stock' | 'exp_date'>
+    & { images?: Maybe<Array<(
+      { __typename?: 'Images' }
+      & Pick<Images, 'img_id' | 'img_url'>
+    )>>, options?: Maybe<Array<(
+      { __typename?: 'Options' }
+      & Pick<Options, 'option_id' | 'name' | 'price' | 'stock' | 'index'>
     )>> }
   )> }
 );
@@ -892,6 +937,56 @@ export function useGetProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type GetProductsQueryHookResult = ReturnType<typeof useGetProductsQuery>;
 export type GetProductsLazyQueryHookResult = ReturnType<typeof useGetProductsLazyQuery>;
 export type GetProductsQueryResult = Apollo.QueryResult<GetProductsQuery, GetProductsQueryVariables>;
+export const GetProductsByIdsDocument = gql`
+    query getProductsByIds($products_str: String!) {
+  getProductsByIds(products_str: $products_str) {
+    product_id
+    name
+    desc
+    price
+    stock
+    org_stock
+    exp_date
+    images {
+      img_id
+      img_url
+    }
+    options {
+      option_id
+      name
+      price
+      stock
+      index
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetProductsByIdsQuery__
+ *
+ * To run a query within a React component, call `useGetProductsByIdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProductsByIdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProductsByIdsQuery({
+ *   variables: {
+ *      products_str: // value for 'products_str'
+ *   },
+ * });
+ */
+export function useGetProductsByIdsQuery(baseOptions: Apollo.QueryHookOptions<GetProductsByIdsQuery, GetProductsByIdsQueryVariables>) {
+        return Apollo.useQuery<GetProductsByIdsQuery, GetProductsByIdsQueryVariables>(GetProductsByIdsDocument, baseOptions);
+      }
+export function useGetProductsByIdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProductsByIdsQuery, GetProductsByIdsQueryVariables>) {
+          return Apollo.useLazyQuery<GetProductsByIdsQuery, GetProductsByIdsQueryVariables>(GetProductsByIdsDocument, baseOptions);
+        }
+export type GetProductsByIdsQueryHookResult = ReturnType<typeof useGetProductsByIdsQuery>;
+export type GetProductsByIdsLazyQueryHookResult = ReturnType<typeof useGetProductsByIdsLazyQuery>;
+export type GetProductsByIdsQueryResult = Apollo.QueryResult<GetProductsByIdsQuery, GetProductsByIdsQueryVariables>;
 export const GetProductsOptionsDocument = gql`
     query getProductsOptions($product_id: Float!) {
   getProductsOptions(product_id: $product_id) {
