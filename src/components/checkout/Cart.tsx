@@ -50,6 +50,13 @@ const Cart = () => {
                         tmp_total += products[i].price * products[i].quantity;
                     }
                 } else {
+                    if (state.quantities[i]) {
+                        tmp_total +=
+                            products[i].option_price * state.quantities[i];
+                    } else {
+                        tmp_total +=
+                            products[i].option_price * products[i].quantity;
+                    }
                 }
             }
 
