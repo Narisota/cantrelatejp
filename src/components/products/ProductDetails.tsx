@@ -47,7 +47,11 @@ const ProductDetails = () => {
         },
     });
 
-    const [option, setOption] = useState({ name: "", option_id: 0 });
+    const [option, setOption] = useState({
+        name: "",
+        option_id: 0,
+        option_price: 0,
+    });
 
     useEffect(() => {
         var elems = document.querySelectorAll(".tooltipped");
@@ -388,6 +392,8 @@ const ProductDetails = () => {
                                                 tmp.option = option.name;
                                                 tmp.option_id =
                                                     option.option_id;
+                                                tmp.option_price =
+                                                    option.option_price;
                                                 dispatch(addProductToCart(tmp));
                                             }
                                         }}
@@ -432,6 +438,9 @@ const ProductDetails = () => {
                                                 option_id:
                                                     odata.getProductsOptions[i]
                                                         .option_id,
+                                                option_price:
+                                                    odata.getProductsOptions[i]
+                                                        .price,
                                             });
                                             document
                                                 .getElementById("add-cart-btn")!

@@ -59,8 +59,9 @@ export const RootReducer = (state = initState, action: Actions) => {
     switch (action.type) {
         case "ADD_PRODUCT_TO_CART": {
             debugger;
-            let products = state.productsInCart || [];
+            let products = loadState().productsInCart || [];
             console.log("products :>> ", products);
+            console.log("action :>> ", action);
 
             //if product is already in cart increase quantity instead of adding a new product
             for (let i = 0; i < products.length; i++) {
@@ -69,11 +70,8 @@ export const RootReducer = (state = initState, action: Actions) => {
                     if (!!action.product && !action.product.option) {
                         products[i].quantity++;
                         return { ...state, productsInCart: products };
-                    }
-                    // if added product and option is the same as any in the cart increase quantity
-                    else if (
-                        products[i].name === action.product!.name &&
-                        products[i].option === action.product!.option
+                    } else if (
+                        products[i].option_id === action.product!.option_id
                     ) {
                         products[i].quantity++;
                         return { ...state, productsInCart: products };
@@ -82,11 +80,9 @@ export const RootReducer = (state = initState, action: Actions) => {
             }
 
             let newProduct: any = action.product;
-
             newProduct.quantity = 1;
 
             products.push(newProduct);
-
             return { ...state, productsInCart: products };
         }
 

@@ -6,7 +6,9 @@ import anime from "animejs";
 
 const Cart = () => {
     const products = useSelector(state => state.productsInCart);
+
     const product_ids = [] as number[];
+
     for (let i = 0; i < products.length; i++) {
         let tmp = true;
         for (let j = 0; j < product_ids.length; j++) {
@@ -19,13 +21,14 @@ const Cart = () => {
             product_ids.push(products[i].product_id);
         }
     }
-    console.log("product_ids :>> ", product_ids);
+
     const products_str = JSON.stringify(product_ids);
     const { data, loading, error } = useGetProductsByIdsQuery({
         variables: {
             products_str,
         },
     });
+
     // const [checkout] = useCheckoutMutation();
     const dispatch = useDispatch();
     const [state, setState] = useState({
@@ -33,15 +36,27 @@ const Cart = () => {
         quantities: [],
     });
 
-    const total = useRef(0);
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         if (!!products) {
+            var tmp_total = 0;
             for (let i = 0; i < products.length; i++) {
-                total.current = products[i].price * products[i].quantity;
+                let product = products[i];
+                if (!product.option || product.option.length === 0) {
+                    if (state.quantities[i]) {
+                        tmp_total += products[i].price * state.quantities[i];
+                    } else {
+                        tmp_total += products[i].price * products[i].quantity;
+                    }
+                } else {
+                }
             }
+
+            setTotal(tmp_total);
+            // setState({ ...state, refresh: !state.refresh });
         }
-    }, [products]);
+    });
 
     if (loading) {
         return <></>;
@@ -96,7 +111,6 @@ const Cart = () => {
     }
 
     if (!!data) {
-        console.log(`data`, data);
         for (let i = 0; i < products.length; i++) {
             // cart item validation
             for (let j = 0; j < data.getProductsByIds.length; j++) {
@@ -172,6 +186,8 @@ const Cart = () => {
         }
     }
 
+    console.log("products :>> ", products);
+
     return (
         <div style={{ minHeight: "80vh" }}>
             <>
@@ -179,7 +195,7 @@ const Cart = () => {
                     Cart
                 </h3>
                 <h6 className="center-align" style={{ fontWeight: 600 }}>
-                    {/* ${Number(total / 100).toFixed(2)} */}
+                    Subtotal(${Number(total / 100).toFixed(2)})
                 </h6>
                 {products.map((_val, i) => {
                     return (
@@ -209,7 +225,19 @@ const Cart = () => {
 
                                 <h6 className="center-align show-on-small hide-on-med-and-up">
                                     {products[i].name} ($
-                                    {Number(products[i].price / 100).toFixed(2)}
+                                    {!products[i].option_price ? (
+                                        <span>
+                                            {Number(
+                                                products[i].price / 100
+                                            ).toFixed(2)}
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            {Number(
+                                                products[i].option_price / 100
+                                            ).toFixed(2)}
+                                        </span>
+                                    )}
                                     )
                                 </h6>
                             </div>
@@ -241,10 +269,10 @@ const Cart = () => {
                                             )
                                         );
 
-                                        let tmp = state.quantities;
-                                        tmp.splice(i, 1);
-
                                         if (e.target.value === "0") {
+                                            let tmp = state.quantities;
+                                            tmp.splice(i, 1);
+
                                             anime({
                                                 duration: 400,
                                                 targets: `.product-${i}`,
@@ -320,7 +348,6 @@ const Cart = () => {
                                                                 ].options![z]
                                                                     .option_id
                                                             ) {
-                                                                debugger;
                                                                 if (
                                                                     Number(
                                                                         e.target
@@ -334,6 +361,21 @@ const Cart = () => {
                                                                     ].stock
                                                                 ) {
                                                                     foo = false;
+                                                                    tmp[
+                                                                        i
+                                                                    ] = Number(
+                                                                        data
+                                                                            ?.getProductsByIds[
+                                                                            j
+                                                                        ]
+                                                                            .options![
+                                                                            z
+                                                                        ].stock
+                                                                    );
+                                                                    setState({
+                                                                        ...state,
+                                                                        quantities: tmp,
+                                                                    });
                                                                     break;
                                                                 }
                                                             }
@@ -361,8 +403,20 @@ const Cart = () => {
                             </div>
 
                             <div className="col hide-on-small-only m1 l2">
-                                <span></span>$
-                                {Number(products[i].price / 100).toFixed(2)}
+                                $
+                                {!products[i].option_price ? (
+                                    <span>
+                                        {Number(
+                                            products[i].price / 100
+                                        ).toFixed(2)}
+                                    </span>
+                                ) : (
+                                    <span>
+                                        {Number(
+                                            products[i].option_price / 100
+                                        ).toFixed(2)}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     );
