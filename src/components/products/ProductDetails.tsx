@@ -51,6 +51,7 @@ const ProductDetails = () => {
         name: "",
         option_id: 0,
         option_price: 0,
+        option_stock: 0,
     });
 
     useEffect(() => {
@@ -75,19 +76,26 @@ const ProductDetails = () => {
             if (!data || !data!.getProduct.org_stock) {
                 percent = 100;
             } else {
-                percent =
-                    (data!.getProduct.stock * 100) / data!.getProduct.org_stock;
+                if (option.option_stock !== 0) {
+                    percent =
+                        (option.option_stock * 100) /
+                        data!.getProduct.org_stock;
+                } else {
+                    percent =
+                        (data!.getProduct.stock * 100) /
+                        data!.getProduct.org_stock;
+                }
 
                 if (percent > 100) {
                     percent = 100;
                 }
             }
 
-            anime({
-                targets: ".filler",
-                width: ["0%", `${percent}%`],
-                easing: "easeInOutExpo",
-            });
+            // anime({
+            //     targets: ".filler",
+            //     width: ["0%", `${percent}%`],
+            //     easing: "easeInOutExpo",
+            // });
 
             if (!document.getElementById("product-img")) {
             } else {
@@ -97,7 +105,7 @@ const ProductDetails = () => {
                 }
             }
         }
-    }, [loading, data]);
+    });
 
     if (loading || oloading) {
         return <></>;
@@ -327,30 +335,60 @@ const ProductDetails = () => {
                         style={{ marginBottom: "16px" }}
                     ></div>
                     {/* eslint-disable-next-line */}
-                    <a
-                        className="tooltipped"
-                        data-position="right"
-                        data-tooltip={`${product.stock} remaining`}
-                    >
-                        <div
-                            className="hide-on-small-only"
-                            style={{
-                                height: "55px",
-                                width: "100%",
-                                border: "1px solid black",
-                                marginBottom: "16px",
-                            }}
+
+                    {odata.getProductsOptions.length === 0 ? (
+                        <>
+                            <a
+                                className="tooltipped"
+                                data-position="right"
+                                data-tooltip={`${product.stock} remaining`}
+                            >
+                                <div
+                                    className="hide-on-small-only"
+                                    style={{
+                                        height: "55px",
+                                        width: "100%",
+                                        border: "1px solid black",
+                                        marginBottom: "16px",
+                                    }}
+                                >
+                                    <span
+                                        className="filler"
+                                        style={{
+                                            display: "inline-block",
+                                            height: "100%",
+                                            backgroundColor: "#0d0303",
+                                        }}
+                                    ></span>
+                                </div>
+                            </a>
+                        </>
+                    ) : (
+                        <a
+                            className="tooltipped"
+                            data-position="right"
+                            data-tooltip={`${option.option_stock} remaining`}
                         >
-                            <span
-                                className="filler"
+                            <div
+                                className="hide-on-small-only "
                                 style={{
-                                    display: "inline-block",
-                                    height: "100%",
-                                    backgroundColor: "#0d0303",
+                                    height: "55px",
+                                    width: "100%",
+                                    border: "1px solid black",
+                                    marginBottom: "16px",
                                 }}
-                            ></span>
-                        </div>
-                    </a>
+                            >
+                                <span
+                                    className="option-bar-filler"
+                                    style={{
+                                        display: "inline-block",
+                                        height: "100%",
+                                        backgroundColor: "#0d0303",
+                                    }}
+                                ></span>
+                            </div>
+                        </a>
+                    )}
 
                     {product.stock === 0 ? (
                         <></>
@@ -366,7 +404,7 @@ const ProductDetails = () => {
                                         <>
                                             {" "}
                                             {option.name ? (
-                                                <>{option.name}</>
+                                                <span>{option.name}</span>
                                             ) : (
                                                 <>SELECT OPTION</>
                                             )}
@@ -431,6 +469,23 @@ const ProductDetails = () => {
                                     <li
                                         key={i}
                                         onClick={() => {
+                                            console.log("clicked");
+                                            let percent = 100;
+
+                                            percent =
+                                                odata.getProductsOptions[i]
+                                                    .stock;
+
+                                            if (percent > 100) {
+                                                percent = 100;
+                                            }
+
+                                            anime({
+                                                targets: ".option-bar-filler",
+                                                width: ["0%", `${percent}%`],
+                                                easing: "easeInOutExpo",
+                                            });
+
                                             setOption({
                                                 name:
                                                     odata.getProductsOptions[i]
@@ -441,6 +496,9 @@ const ProductDetails = () => {
                                                 option_price:
                                                     odata.getProductsOptions[i]
                                                         .price,
+                                                option_stock:
+                                                    odata.getProductsOptions[i]
+                                                        .stock,
                                             });
                                             document
                                                 .getElementById("add-cart-btn")!
