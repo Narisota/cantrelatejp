@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
-import { setAccessToken, setMainAccessToken } from "./accessToken";
+import { setAccessToken } from "./accessToken";
 import App from "./App";
-import { checkMainAuth } from "./CheckAuth";
 import Preloader from "./components/Preloader";
-import { useMaintenanceLoginMutation } from "./generated/graphql";
 import { GetMaintenance } from "./GetMaintenance";
 import URI from "./URI";
 
 const AppWrapper = () => {
-    const [maintLogin] = useMaintenanceLoginMutation();
     const maintance = GetMaintenance();
     const [pageLoader, setPageLoader] = useState(true);
 
-    // eslint-disable-next-line
-    const [mainLoader, setMainLoader] = useState(false);
     useEffect(() => {
         //get new accessToken & refreshToken with fetch to URI/refresh_token
         try {
@@ -51,61 +46,8 @@ const AppWrapper = () => {
         } catch {}
     }, [setPageLoader]);
 
-    if (pageLoader || !maintance) {
+    if (pageLoader || !maintance || maintance.getMaintenance) {
         return <Preloader />;
-    } else if (maintance.getMaintenance) {
-        return (
-            <>
-                {checkMainAuth() ? (
-                    <App />
-                ) : (
-                    <div style={{ position: "absolute", left: "50%" }}>
-                        <div
-                            style={{
-                                position: "relative",
-                                left: "-50%",
-                            }}
-                        >
-                            <span
-                                onClick={async () => {
-                                    let acc = localStorage.getItem(
-                                        "access_id"
-                                    ) as string;
-                                    let pass = localStorage.getItem(
-                                        "password"
-                                    ) as string;
-                                    try {
-                                        const res = await maintLogin({
-                                            variables: {
-                                                access_id: acc,
-                                                password: pass,
-                                            },
-                                        });
-
-                                        if (res && res.data) {
-                                            let tmp = res.data.maintenanceLogin
-                                                .accessToken as any;
-                                            setMainAccessToken(tmp!);
-                                            localStorage.setItem(
-                                                "main_qwf",
-                                                res.data.maintenanceLogin
-                                                    .refreshToken!
-                                            );
-                                            setMainLoader(true);
-
-                                            window.location.reload();
-                                        }
-                                    } catch {}
-                                }}
-                            >
-                                App is in maintenance mode. Please come back
-                                later
-                            </span>
-                        </div>
-                    </div>
-                )}
-            </>
-        );
     } else {
         return <App />;
     }

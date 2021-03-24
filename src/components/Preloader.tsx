@@ -1,5 +1,6 @@
 import "../css/Preloader.scss";
 import anime from "animejs/lib/anime.es.js";
+import { useGetMaintenanceQuery } from "../generated/graphql";
 
 // const animation2 = () => {
 //     anime.timeline({ easing: "easeInOutSine", duration: 500 }).add({});
@@ -16,9 +17,12 @@ const reloadAnimation = () => {
 };
 
 const Preloader = () => {
+    const { data, loading } = useGetMaintenanceQuery();
+
     setTimeout(() => {
         reloadAnimation();
-    }, 10000);
+    }, 5000);
+
     anime
         .timeline({
             easing: "easeInOutSine",
@@ -26,7 +30,6 @@ const Preloader = () => {
             elasticity: 400,
             loop: true,
         })
-        .add({ targets: [""] })
         .add({
             targets: [".circle-1", ".circle-3"],
             translateY: -24,
@@ -36,7 +39,7 @@ const Preloader = () => {
                 targets: [".circle-2", ".circle-4"],
                 translateY: 24,
             },
-            500
+            0
         )
         .add({
             targets: [".circle-1", ".circle-3"],
@@ -110,7 +113,11 @@ const Preloader = () => {
                     className="reload-text"
                     onClick={() => window.location.reload()}
                 >
-                    Loading, please wait...
+                    {!data || !data.getMaintenance || loading ? (
+                        <>Loading, please wait...</>
+                    ) : (
+                        <>App is in maintenance mode, please come back later.</>
+                    )}
                 </h4>
             </div>
         </div>

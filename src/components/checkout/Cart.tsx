@@ -1,28 +1,69 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useGetProductsQuery } from "../../generated/graphql";
+import { useGetProductsByIdsQuery } from "../../generated/graphql";
 import { changeQuantityOnProduct } from "../../redux/actions/userAction";
 import anime from "animejs";
 
 const Cart = () => {
-    const { data, loading, error } = useGetProductsQuery();
-    // const [checkout] = useCheckoutMutation();
     const products = useSelector(state => state.productsInCart);
+
+    const product_ids = [] as number[];
+
+    for (let i = 0; i < products.length; i++) {
+        let tmp = true;
+        for (let j = 0; j < product_ids.length; j++) {
+            if (product_ids[j] === products[i].product_id) {
+                tmp = false;
+            }
+        }
+
+        if (tmp) {
+            product_ids.push(products[i].product_id);
+        }
+    }
+
+    const products_str = JSON.stringify(product_ids);
+    const { data, loading, error } = useGetProductsByIdsQuery({
+        variables: {
+            products_str,
+        },
+    });
+
+    // const [checkout] = useCheckoutMutation();
     const dispatch = useDispatch();
     const [state, setState] = useState({
         refresh: false,
         quantities: [],
     });
 
-    const total = useRef(0);
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         if (!!products) {
+            var tmp_total = 0;
             for (let i = 0; i < products.length; i++) {
-                total.current = products[i].price * products[i].quantity;
+                let product = products[i];
+                if (!product.option || product.option.length === 0) {
+                    if (state.quantities[i]) {
+                        tmp_total += products[i].price * state.quantities[i];
+                    } else {
+                        tmp_total += products[i].price * products[i].quantity;
+                    }
+                } else {
+                    if (state.quantities[i]) {
+                        tmp_total +=
+                            products[i].option_price * state.quantities[i];
+                    } else {
+                        tmp_total +=
+                            products[i].option_price * products[i].quantity;
+                    }
+                }
             }
+
+            setTotal(tmp_total);
+            // setState({ ...state, refresh: !state.refresh });
         }
-    }, [products]);
+    });
 
     if (loading) {
         return <></>;
@@ -79,24 +120,80 @@ const Cart = () => {
     if (!!data) {
         for (let i = 0; i < products.length; i++) {
             // cart item validation
-            for (let j = 0; j < data.getProducts.length; j++) {
-                if (products[i].product_id === data.getProducts[j].product_id) {
-                    if (products[i].quantity > data.getProducts[j].stock) {
-                        // edit the item
-                        products[i].name = data.getProducts[j].name;
-                        products[i].price = data.getProducts[j].price;
-                        products[i].quantity = data.getProducts[j].stock;
-                        dispatch(
-                            changeQuantityOnProduct(
-                                data.getProducts[j].stock,
-                                i
-                            )
-                        );
+            for (let j = 0; j < data.getProductsByIds.length; j++) {
+                if (
+                    products[i].product_id ===
+                    data.getProductsByIds[j].product_id
+                ) {
+                    if (!products[i].option) {
+                        if (
+                            products[i].quantity >
+                            data.getProductsByIds[j].stock
+                        ) {
+                            // edit the item
+                            products[i].name = data.getProductsByIds[j].name;
+                            products[i].price = data.getProductsByIds[j].price;
+                            products[i].quantity =
+                                data.getProductsByIds[j].stock;
+                            dispatch(
+                                changeQuantityOnProduct(
+                                    data.getProductsByIds[j].stock,
+                                    i
+                                )
+                            );
+                        }
+                    } else {
+                        if (
+                            !!data.getProductsByIds[j] &&
+                            !!data.getProductsByIds[j].options
+                        ) {
+                            for (
+                                let ii = 0;
+                                ii < data.getProductsByIds[j].options!.length;
+                                ii++
+                            ) {
+                                if (
+                                    products[i].option_id ===
+                                    data.getProductsByIds[j].options![ii]
+                                        .option_id
+                                ) {
+                                    //check stock
+                                    if (
+                                        products[i].quantity >
+                                        data.getProductsByIds[j].options![ii]
+                                            .stock
+                                    ) {
+                                        dispatch(
+                                            changeQuantityOnProduct(
+                                                data.getProductsByIds[j]
+                                                    .options![ii].stock,
+                                                i
+                                            )
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
+                        // if (products[i].quantity > data.getProducts[j].stock) {
+                        //     // edit the item
+                        //     products[i].name = data.getProducts[j].name;
+                        //     products[i].price = data.getProducts[j].price;
+                        //     products[i].quantity = data.getProducts[j].stock;
+                        //     dispatch(
+                        //         changeQuantityOnProduct(
+                        //             data.getProducts[j].stock,
+                        //             i
+                        //         )
+                        //     );
+                        // }
                     }
                 }
             }
         }
     }
+
+    console.log("products :>> ", products);
 
     return (
         <div style={{ minHeight: "80vh" }}>
@@ -105,7 +202,7 @@ const Cart = () => {
                     Cart
                 </h3>
                 <h6 className="center-align" style={{ fontWeight: 600 }}>
-                    {/* ${Number(total / 100).toFixed(2)} */}
+                    Subtotal(${Number(total / 100).toFixed(2)})
                 </h6>
                 {products.map((_val, i) => {
                     return (
@@ -123,12 +220,31 @@ const Cart = () => {
                             </div>
                             <div className="col s12 m4">
                                 <h5 className="center-align hide-on-small-only">
-                                    {products[i].name}
+                                    {products[i].name}{" "}
+                                    {!products[i].option ? (
+                                        <></>
+                                    ) : (
+                                        <span className="bold">
+                                            ({products[i].option})
+                                        </span>
+                                    )}
                                 </h5>
 
                                 <h6 className="center-align show-on-small hide-on-med-and-up">
                                     {products[i].name} ($
-                                    {Number(products[i].price / 100).toFixed(2)}
+                                    {!products[i].option_price ? (
+                                        <span>
+                                            {Number(
+                                                products[i].price / 100
+                                            ).toFixed(2)}
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            {Number(
+                                                products[i].option_price / 100
+                                            ).toFixed(2)}
+                                        </span>
+                                    )}
                                     )
                                 </h6>
                             </div>
@@ -160,10 +276,10 @@ const Cart = () => {
                                             )
                                         );
 
-                                        let tmp = state.quantities;
-                                        tmp.splice(i, 1);
-
                                         if (e.target.value === "0") {
+                                            let tmp = state.quantities;
+                                            tmp.splice(i, 1);
+
                                             anime({
                                                 duration: 400,
                                                 targets: `.product-${i}`,
@@ -203,11 +319,85 @@ const Cart = () => {
                                         }
 
                                         if (e.target.value.match(/\d/g)) {
-                                            tmp[i] = Number(e.target.value);
-                                            setState({
-                                                ...state,
-                                                quantities: tmp,
-                                            });
+                                            //check if value is less than stock
+                                            let foo = true;
+                                            for (
+                                                let j = 0;
+                                                j <
+                                                data!.getProductsByIds.length;
+                                                j++
+                                            ) {
+                                                if (
+                                                    data?.getProductsByIds[j]
+                                                        .options
+                                                ) {
+                                                    if (
+                                                        data?.getProductsByIds[
+                                                            j
+                                                        ].product_id ===
+                                                        products[i].product_id
+                                                    ) {
+                                                        for (
+                                                            let z = 0;
+                                                            z <
+                                                            data
+                                                                ?.getProductsByIds[
+                                                                j
+                                                            ].options!.length;
+                                                            z++
+                                                        ) {
+                                                            if (
+                                                                products[i]
+                                                                    .option_id ===
+                                                                data
+                                                                    ?.getProductsByIds[
+                                                                    j
+                                                                ].options![z]
+                                                                    .option_id
+                                                            ) {
+                                                                if (
+                                                                    Number(
+                                                                        e.target
+                                                                            .value
+                                                                    ) >
+                                                                    data
+                                                                        ?.getProductsByIds[
+                                                                        j
+                                                                    ].options![
+                                                                        z
+                                                                    ].stock
+                                                                ) {
+                                                                    foo = false;
+                                                                    tmp[
+                                                                        i
+                                                                    ] = Number(
+                                                                        data
+                                                                            ?.getProductsByIds[
+                                                                            j
+                                                                        ]
+                                                                            .options![
+                                                                            z
+                                                                        ].stock
+                                                                    );
+                                                                    setState({
+                                                                        ...state,
+                                                                        quantities: tmp,
+                                                                    });
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (foo) {
+                                                tmp[i] = Number(e.target.value);
+                                                setState({
+                                                    ...state,
+                                                    quantities: tmp,
+                                                });
+                                            }
                                         }
                                     }}
                                     style={{
@@ -220,8 +410,20 @@ const Cart = () => {
                             </div>
 
                             <div className="col hide-on-small-only m1 l2">
-                                <span></span>$
-                                {Number(products[i].price / 100).toFixed(2)}
+                                $
+                                {!products[i].option_price ? (
+                                    <span>
+                                        {Number(
+                                            products[i].price / 100
+                                        ).toFixed(2)}
+                                    </span>
+                                ) : (
+                                    <span>
+                                        {Number(
+                                            products[i].option_price / 100
+                                        ).toFixed(2)}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     );

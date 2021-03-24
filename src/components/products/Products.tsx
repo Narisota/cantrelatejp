@@ -143,8 +143,12 @@ const Products = () => {
                                             <div className="card-image">
                                                 <img
                                                     src={
-                                                        product.images[0]
-                                                            .img_url!
+                                                        !product.images[0] ||
+                                                        !product.images[0]
+                                                            .img_url
+                                                            ? "https://materializecss.com/images/sample-1.jpg"
+                                                            : product.images[0]
+                                                                  .img_url
                                                     }
                                                     alt={product.name}
                                                 />

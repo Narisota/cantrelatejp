@@ -1,6 +1,7 @@
 import { Product } from "../RootReducer";
 
 export const addProductToCart = (product: Product) => {
+    console.log("product :>> ", product);
     return {
         type: "ADD_PRODUCT_TO_CART",
         product,

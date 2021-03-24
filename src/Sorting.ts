@@ -1,4 +1,5 @@
 export const Sorting = () => {
+    //alphabetic sort
     const sortByProp = (arr: any, prop: string, invert?: boolean) => {
         let props = [] as any[];
         arr.forEach((_val: any, i: any) => {

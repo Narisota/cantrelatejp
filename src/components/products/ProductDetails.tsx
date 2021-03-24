@@ -1,9 +1,35 @@
 import { Redirect } from "react-router";
-import { useGetProductQuery } from "../../generated/graphql";
+import {
+    useGetProductQuery,
+    useGetProductsOptionsQuery,
+} from "../../generated/graphql";
 import { useDispatch } from "react-redux";
 import { addProductToCart } from "../../redux/actions/userAction";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import anime from "animejs";
+
+const GetProductOptions = () => {
+    var product_id;
+    if (process.env.NODE_ENV === "production") {
+        product_id = Number(window.location.href.split(":")[2]);
+    } else {
+        product_id = Number(window.location.href.split(":")[3]);
+    }
+
+    const { data, loading } = useGetProductsOptionsQuery({
+        variables: {
+            product_id,
+        },
+    });
+
+    let odata = data,
+        oloading = loading;
+
+    return {
+        odata,
+        oloading,
+    };
+};
 
 const ProductDetails = () => {
     let product_id: number;
@@ -14,11 +40,18 @@ const ProductDetails = () => {
     }
 
     const dispatch = useDispatch();
-
+    const { odata, oloading } = GetProductOptions();
     const { data, loading, error } = useGetProductQuery({
         variables: {
             product_id,
         },
+    });
+
+    const [option, setOption] = useState({
+        name: "",
+        option_id: 0,
+        option_price: 0,
+        option_stock: 0,
     });
 
     useEffect(() => {
@@ -27,25 +60,42 @@ const ProductDetails = () => {
         elems = document.querySelectorAll(".carousel");
         M.Carousel.init(elems);
 
+        elems = document.querySelectorAll(".dropdown-trigger");
+        M.Dropdown.init(elems);
+
         if (!loading) {
+            elems = document.querySelectorAll(".tooltipped");
+            M.Tooltip.init(elems);
+            elems = document.querySelectorAll(".carousel");
+            M.Carousel.init(elems);
+
+            elems = document.querySelectorAll(".dropdown-trigger");
+            M.Dropdown.init(elems);
             // (stock * 100)/ org_stock
             let percent = 50;
             if (!data || !data!.getProduct.org_stock) {
                 percent = 100;
             } else {
-                percent =
-                    (data!.getProduct.stock * 100) / data!.getProduct.org_stock;
+                if (option.option_stock !== 0) {
+                    percent =
+                        (option.option_stock * 100) /
+                        data!.getProduct.org_stock;
+                } else {
+                    percent =
+                        (data!.getProduct.stock * 100) /
+                        data!.getProduct.org_stock;
+                }
 
                 if (percent > 100) {
                     percent = 100;
                 }
             }
 
-            anime({
-                targets: ".filler",
-                width: ["0%", `${percent}%`],
-                easing: "easeInOutExpo",
-            });
+            // anime({
+            //     targets: ".filler",
+            //     width: ["0%", `${percent}%`],
+            //     easing: "easeInOutExpo",
+            // });
 
             if (!document.getElementById("product-img")) {
             } else {
@@ -55,15 +105,17 @@ const ProductDetails = () => {
                 }
             }
         }
-    }, [loading, data]);
+    });
 
-    if (loading) {
+    if (loading || oloading) {
         return <></>;
     }
 
-    if (!data || error) {
+    if (!data || error || !odata) {
         return <Redirect to="/products" />;
     }
+
+    console.log("odata :>> ", odata);
 
     let product: any = data!.getProduct;
 
@@ -75,6 +127,7 @@ const ProductDetails = () => {
     //     );
     //     instance.next();
     // }, 5000);
+
     return (
         <div>
             <h3 className="center-align">{product.name}</h3>
@@ -130,6 +183,7 @@ const ProductDetails = () => {
                                                                 instance.prev();
                                                             }}
                                                         ></span>
+
                                                         <img
                                                             alt="product"
                                                             style={{
@@ -143,6 +197,7 @@ const ProductDetails = () => {
                                                                 ].img_url || ""
                                                             }
                                                         />
+
                                                         <span
                                                             style={{
                                                                 display:
@@ -280,54 +335,185 @@ const ProductDetails = () => {
                         style={{ marginBottom: "16px" }}
                     ></div>
                     {/* eslint-disable-next-line */}
-                    <a
-                        className="tooltipped"
-                        data-position="right"
-                        data-tooltip={`${product.stock} remaining`}
-                    >
-                        <div
-                            className="hide-on-small-only"
-                            style={{
-                                height: "55px",
-                                width: "100%",
-                                border: "1px solid black",
-                                marginBottom: "16px",
-                            }}
+
+                    {odata.getProductsOptions.length === 0 ? (
+                        <>
+                            <a
+                                className="tooltipped"
+                                data-position="right"
+                                data-tooltip={`${product.stock} remaining`}
+                            >
+                                <div
+                                    className="hide-on-small-only"
+                                    style={{
+                                        height: "55px",
+                                        width: "100%",
+                                        border: "1px solid black",
+                                        marginBottom: "16px",
+                                    }}
+                                >
+                                    <span
+                                        className="filler"
+                                        style={{
+                                            display: "inline-block",
+                                            height: "100%",
+                                            backgroundColor: "#0d0303",
+                                        }}
+                                    ></span>
+                                </div>
+                            </a>
+                        </>
+                    ) : (
+                        <a
+                            className="tooltipped"
+                            data-position="right"
+                            data-tooltip={`${option.option_stock} remaining`}
                         >
-                            <span
-                                className="filler"
+                            <div
+                                className="hide-on-small-only "
                                 style={{
-                                    display: "inline-block",
-                                    height: "100%",
-                                    backgroundColor: "#0d0303",
+                                    height: "55px",
+                                    width: "100%",
+                                    border: "1px solid black",
+                                    marginBottom: "16px",
                                 }}
-                            ></span>
-                        </div>
-                    </a>
+                            >
+                                <span
+                                    className="option-bar-filler"
+                                    style={{
+                                        display: "inline-block",
+                                        height: "100%",
+                                        backgroundColor: "#0d0303",
+                                    }}
+                                ></span>
+                            </div>
+                        </a>
+                    )}
 
                     {product.stock === 0 ? (
                         <></>
                     ) : (
                         <>
-                            <button
-                                style={{
-                                    width: "100%",
-                                    backgroundColor: "#0a0a0a",
-                                    color: "#fff",
-                                    border: "none",
-                                    height: "45px",
-                                }}
-                                onClick={() => {
-                                    M.toast({
-                                        html: "Product was added to cart",
-                                    });
-                                    dispatch(addProductToCart(product));
-                                }}
-                            >
-                                Add to Cart
-                            </button>
+                            {odata.getProductsOptions.length !== 0 ? (
+                                <>
+                                    {/* eslint-disable-next-line */}
+                                    <a
+                                        className="dropdown-trigger btn select"
+                                        data-target="dropdown1"
+                                    >
+                                        <>
+                                            {" "}
+                                            {option.name ? (
+                                                <span>{option.name}</span>
+                                            ) : (
+                                                <>SELECT OPTION</>
+                                            )}
+                                        </>
+                                    </a>
+                                    <button
+                                        id="add-cart-btn"
+                                        className="btn disabled"
+                                        style={{
+                                            width: "100%",
+                                            backgroundColor: "#0a0a0a",
+                                            color: "#fff",
+                                            border: "none",
+                                            height: "45px",
+                                        }}
+                                        onClick={() => {
+                                            if (!!option) {
+                                                M.toast({
+                                                    html:
+                                                        "Product was added to cart",
+                                                });
+                                                let tmp = product;
+                                                tmp.option = option.name;
+                                                tmp.option_id =
+                                                    option.option_id;
+                                                tmp.option_price =
+                                                    option.option_price;
+                                                dispatch(addProductToCart(tmp));
+                                            }
+                                        }}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    id="add-cart-btn"
+                                    style={{
+                                        width: "100%",
+                                        backgroundColor: "#0a0a0a",
+                                        color: "#fff",
+                                        border: "none",
+                                        height: "45px",
+                                    }}
+                                    onClick={() => {
+                                        M.toast({
+                                            html: "Product was added to cart",
+                                        });
+                                        dispatch(addProductToCart(product));
+                                    }}
+                                >
+                                    Add to Cart
+                                </button>
+                            )}
                         </>
                     )}
+
+                    <ul id="dropdown1" className="dropdown-content">
+                        <>
+                            {odata.getProductsOptions.map((_val, i) => {
+                                return (
+                                    <li
+                                        key={i}
+                                        onClick={() => {
+                                            console.log("clicked");
+                                            let percent = 100;
+
+                                            percent =
+                                                odata.getProductsOptions[i]
+                                                    .stock;
+
+                                            if (percent > 100) {
+                                                percent = 100;
+                                            }
+
+                                            anime({
+                                                targets: ".option-bar-filler",
+                                                width: ["0%", `${percent}%`],
+                                                easing: "easeInOutExpo",
+                                            });
+
+                                            setOption({
+                                                name:
+                                                    odata.getProductsOptions[i]
+                                                        .name,
+                                                option_id:
+                                                    odata.getProductsOptions[i]
+                                                        .option_id,
+                                                option_price:
+                                                    odata.getProductsOptions[i]
+                                                        .price,
+                                                option_stock:
+                                                    odata.getProductsOptions[i]
+                                                        .stock,
+                                            });
+                                            document
+                                                .getElementById("add-cart-btn")!
+                                                .classList.remove("disabled");
+                                        }}
+                                    >
+                                        {/* eslint-disable-next-line */}
+                                        <a>
+                                            {odata.getProductsOptions[i].name}
+                                        </a>
+                                    </li>
+                                );
+                            })}
+                        </>
+                    </ul>
                 </div>
             </div>
         </div>

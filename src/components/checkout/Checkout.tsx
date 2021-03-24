@@ -329,11 +329,17 @@ const Checkout = props => {
     };
 
     if (subtotal === -1) {
-        let tmp_subtotal = 0;
+        let tmp_subtotal = 0,
+            shipping_total = 100;
 
-        let shipping_total = 100;
         for (let i = 0; i < products.length; i++) {
-            tmp_subtotal += products[i].price * products[i].quantity;
+            let product = products[i];
+            if (!product.option || product.option.length === 0) {
+                tmp_subtotal += products[i].price * products[i].quantity;
+            } else {
+                tmp_subtotal += products[i].option_price * products[i].quantity;
+            }
+
             shipping_total += products[i].quantity * 50;
         }
 
@@ -343,6 +349,7 @@ const Checkout = props => {
 
         let tax = Math.round(tmp_subtotal * 0.095);
 
+        // shipping not added to subtotal bc it isn't rerendered if a coupon is added
         setTotal(tmp_subtotal + tax);
         setSubtotal(tmp_subtotal);
         setShipping(shipping_total);
@@ -524,32 +531,45 @@ const Checkout = props => {
                                                         fontWeight: 600,
                                                     }}
                                                 >
-                                                    {products[i].name}
-                                                    {products[i].quantity !==
-                                                    1 ? (
-                                                        <>
-                                                            {" "}
-                                                            x
-                                                            {
-                                                                products[i]
-                                                                    .quantity
-                                                            }
-                                                        </>
-                                                    ) : (
+                                                    {products[i].name}{" "}
+                                                    {!products[i].option ? (
                                                         <></>
-                                                    )}
+                                                    ) : (
+                                                        <span className="bold">
+                                                            (
+                                                            {products[i].option}
+                                                            )
+                                                        </span>
+                                                    )}{" "}
+                                                    x{products[i].quantity}
                                                 </div>
                                                 <div
                                                     className="product-subtotal"
                                                     style={{ fontWeight: 390 }}
                                                 >
                                                     $
-                                                    {Number(
-                                                        (products[i].price *
-                                                            products[i]
-                                                                .quantity) /
-                                                            100
-                                                    ).toFixed(2)}
+                                                    {!products[i]
+                                                        .option_price ? (
+                                                        <span>
+                                                            {Number(
+                                                                (products[i]
+                                                                    .price *
+                                                                    products[i]
+                                                                        .quantity) /
+                                                                    100
+                                                            ).toFixed(2)}
+                                                        </span>
+                                                    ) : (
+                                                        <span>
+                                                            {Number(
+                                                                (products[i]
+                                                                    .option_price *
+                                                                    products[i]
+                                                                        .quantity) /
+                                                                    100
+                                                            ).toFixed(2)}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -841,10 +861,12 @@ const Checkout = props => {
                             id="name"
                             value={address.name}
                             type="text"
-                            onChange={e => setAddress({
-                                ...address,
-                                name: e.target.value,
-                            })}
+                            onChange={e =>
+                                setAddress({
+                                    ...address,
+                                    name: e.target.value,
+                                })
+                            }
                         />
                         <label htmlFor="name">Name</label>
                         <span

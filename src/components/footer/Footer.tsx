@@ -1,11 +1,10 @@
 import CopyrightBar from "./CopyrightBar";
-import FooterLogo from "../../images/Blank_Footer_logo.png";
 import { FaInstagram, FaEnvelope, FaTwitter, FaFacebook } from "react-icons/fa";
 import { useGetSocialsQuery } from "../../generated/graphql";
 import "../../css/footer.scss";
 
 const Footer = () => {
-    const { data, loading } = useGetSocialsQuery({
+    const { data } = useGetSocialsQuery({
         variables: {
             component: "footer",
         },
@@ -109,7 +108,7 @@ const Footer = () => {
                                                         </a>
                                                     );
                                                 } else {
-                                                    <></>;
+                                                    return null;
                                                 }
                                             })}
                                         </>
